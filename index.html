@@ -89,7 +89,7 @@
     border: 1px solid;
   }
   .status-badge.online  { background: rgba(31,184,110,.15); color: var(--success); border-color: rgba(31,184,110,.3); }
-  .status-badge.offline { background: rgba(224,62,62,.12);  color: var(--danger);  border-color: rgba(224,62,62,.25); }
+  .status-badge.error   { background: rgba(224,62,62,.12);  color: var(--danger);  border-color: rgba(224,62,62,.25); }
 
   /* ── MAIN ── */
   main { padding: 28px; max-width: 1480px; margin: 0 auto; }
@@ -366,8 +366,7 @@
     </div>
   </div>
   <div class="header-actions">
-    <span id="status-badge" class="status-badge offline">● LocalStorage Off-line</span>
-    <button class="btn btn-ghost btn-sm" onclick="openConfig()">⚙ Configurar Planilha</button>
+    <span id="status-badge" class="status-badge online">● Conectando...</span>
   </div>
 </header>
 
@@ -467,26 +466,7 @@
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
-<!-- ===== MODAL: CONFIG ===== -->
-<div class="overlay" id="modal-config">
-  <div class="modal" style="width:480px">
-    <div class="modal-title">Configurar Planilha</div>
-    <div class="modal-sub">Conecte ao Google Sheets via Apps Script</div>
-    <div class="config-note">
-      Cole abaixo a URL de implantação do Google Apps Script.<br>
-      Deve terminar com <code>/exec</code>.<br>
-      A URL é salva automaticamente e reconectada ao recarregar a página.
-    </div>
-    <div class="field">
-      <label>URL da API (Apps Script)</label>
-      <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-config')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveConfig()">Conectar</button>
-    </div>
-  </div>
-</div>
+<!-- modal-config removido: URL da API fixada no código -->
 
 <!-- ===== MODAL: ADD/EDIT ===== -->
 <div class="overlay" id="modal-form">
@@ -568,9 +548,9 @@
 
 <script>
   // ── STATE ──
+  const API_URL = 'https://script.google.com/macros/s/AKfycbyGlBCmCLzt40fHfU-8mfgq9xBI4hiZmQ5MlvNfcwvQYob7jzMnfvSg7ANK9JxboA8bVQ/exec';
   let allData = [];
   let filteredData = [];
-  let apiUrl = localStorage.getItem('mb_api_url') || '';
   let pendingDeleteId = null;
 
   const RESPONSAVEIS = [
@@ -594,12 +574,7 @@
 
   // ── INIT ──
   window.addEventListener('DOMContentLoaded', () => {
-    if (apiUrl) {
-      document.getElementById('api-url-input').value = apiUrl;
-      loadData();
-    } else {
-      renderTable([]);
-    }
+    loadData();
     document.querySelectorAll('.overlay').forEach(o => {
       o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
     });
@@ -607,26 +582,22 @@
 
   // ── API ──
   async function loadData() {
-    if (!apiUrl) { toast('Configure a planilha primeiro.', 'info'); return; }
     const btn = document.getElementById('btn-refresh');
     btn.innerHTML = '<span class="spinner"></span>';
     btn.disabled = true;
     try {
-      const res = await fetch(apiUrl);
+      const res = await fetch(API_URL);
       const json = await res.json();
       if (json.status === 'ok') {
         allData = json.data || [];
         applyFilters();
         updateBadge(true);
-        localStorage.setItem('mb_fallback', JSON.stringify(allData));
       } else {
         throw new Error(json.message);
       }
     } catch (e) {
-      toast('Erro ao carregar dados: ' + e.message, 'error');
-      const fallback = localStorage.getItem('mb_fallback');
-      if (fallback) { allData = JSON.parse(fallback); applyFilters(); }
       updateBadge(false);
+      toast('Erro ao conectar ao Google Sheets. Verifique a API.', 'error');
     } finally {
       btn.innerHTML = '↻ Atualizar';
       btn.disabled = false;
@@ -634,30 +605,14 @@
   }
 
   async function apiPost(payload) {
-    if (!apiUrl) { toast('Sem conexão com a planilha.', 'error'); return null; }
-    const res = await fetch(apiUrl, {
+    const res = await fetch(API_URL, {
       method: 'POST',
       body: JSON.stringify(payload)
     });
     return await res.json();
   }
 
-  // ── CONFIG ──
-  function openConfig() {
-    document.getElementById('api-url-input').value = apiUrl;
-    openModal('modal-config');
-  }
-  async function saveConfig() {
-    const url = document.getElementById('api-url-input').value.trim();
-    if (!url || !url.includes('/exec')) {
-      toast('URL inválida. Deve terminar com /exec.', 'error'); return;
-    }
-    apiUrl = url;
-    localStorage.setItem('mb_api_url', url);
-    closeModal('modal-config');
-    toast('Planilha configurada. Carregando dados...', 'info');
-    await loadData();
-  }
+  // ── CONFIG removida: URL fixada em API_URL ──
 
   // ── FILTERS ──
   function applyFilters() {
@@ -867,8 +822,8 @@
   // ── STATUS BADGE ──
   function updateBadge(online) {
     const b = document.getElementById('status-badge');
-    b.className = 'status-badge ' + (online ? 'online' : 'offline');
-    b.textContent = online ? '● Google Sheets Online' : '● LocalStorage Off-line';
+    b.className = 'status-badge ' + (online ? 'online' : 'error');
+    b.textContent = online ? '● Google Sheets Online' : '● Erro de conexão';
   }
 
   // ── TOAST ──
