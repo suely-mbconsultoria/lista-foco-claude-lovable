@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lista Foco Comercial — Imersão Lovable & Claude · MB Consultoria</title>
+<style>
+  :root {
+    --navy:       #0D1B2A;
+    --navy-mid:   #132233;
+    --navy-light: #1A2F45;
+    --navy-border:#1E3A52;
+    --orange:     #E8580C;
+    --orange-dim: #C44A08;
+    --purple:     #7B3FA8;
+    --rose:       #C4356A;
+    --teal:       #1A8FA8;
+    --text:       #E8EFF6;
+    --text-muted: #8BA3BB;
+    --text-dim:   #5A7A96;
+    --white:      #FFFFFF;
+    --success:    #1FB86E;
+    --warning:    #F0A500;
+    --danger:     #E03E3E;
+    --radius:     10px;
+    --radius-lg:  16px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--navy-mid) 0%, #0A1520 100%);
+    border-bottom: 1px solid var(--navy-border);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand-pill {
+    background: var(--orange);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .header-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .header-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .status-badge {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    border: 1px solid;
+  }
+  .status-badge.online  { background: rgba(31,184,110,.15); color: var(--success); border-color: rgba(31,184,110,.3); }
+  .status-badge.offline { background: rgba(224,62,62,.12);  color: var(--danger);  border-color: rgba(224,62,62,.25); }
+
+  /* ── MAIN ── */
+  main { padding: 28px; max-width: 1480px; margin: 0 auto; }
+
+  /* ── DASHBOARD ── */
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 900px) { .dashboard { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 520px) { .dashboard { grid-template-columns: 1fr; } }
+
+  .kpi-card {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .15s;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    border-radius: 3px 0 0 3px;
+  }
+  .kpi-card.orange::before { background: var(--orange); }
+  .kpi-card.purple::before { background: var(--purple); }
+  .kpi-card.teal::before   { background: var(--teal); }
+  .kpi-card.rose::before   { background: var(--rose); }
+  .kpi-card:hover { transform: translateY(-2px); }
+
+  .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+  .kpi-value { font-size: 32px; font-weight: 700; line-height: 1; }
+  .kpi-card.orange .kpi-value { color: var(--orange); }
+  .kpi-card.purple .kpi-value { color: #A97FD4; }
+  .kpi-card.teal   .kpi-value { color: var(--teal); }
+  .kpi-card.rose   .kpi-value { color: #E07FA0; }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 180px; }
+  .filter-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
+  input[type=text], select {
+    background: var(--navy-light);
+    border: 1px solid var(--navy-border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 9px 13px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color .15s;
+    width: 100%;
+  }
+  input[type=text]:focus, select:focus { border-color: var(--orange); }
+  select option { background: var(--navy-mid); }
+  .toolbar-btns { display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: var(--radius);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    border: none; transition: all .15s; white-space: nowrap;
+  }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-primary:hover { background: var(--orange-dim); }
+  .btn-secondary { background: var(--navy-light); color: var(--text); border: 1px solid var(--navy-border); }
+  .btn-secondary:hover { border-color: var(--text-muted); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--navy-border); }
+  .btn-ghost:hover { background: var(--navy-light); color: var(--text); }
+  .btn-danger { background: rgba(224,62,62,.15); color: var(--danger); border: 1px solid rgba(224,62,62,.25); }
+  .btn-danger:hover { background: rgba(224,62,62,.25); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-icon { padding: 7px; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--navy-border);
+  }
+  .table-info { font-size: 12px; color: var(--text-muted); }
+  .table-info strong { color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 11px 16px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+    background: rgba(255,255,255,.02);
+    border-bottom: 1px solid var(--navy-border);
+    text-align: left;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    transition: background .1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,.03); }
+  tbody td { padding: 13px 16px; vertical-align: middle; }
+
+  .company-name { font-weight: 600; color: var(--text); font-size: 13px; }
+  .responsible-name { color: var(--text-muted); font-size: 12px; }
+
+  .status-chip {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .chip-gray    { background: rgba(138,163,187,.12); color: var(--text-muted); }
+  .chip-blue    { background: rgba(26,143,168,.15);  color: #5BC8DC; }
+  .chip-purple  { background: rgba(123,63,168,.15);  color: #B97FE0; }
+  .chip-orange  { background: rgba(232,88,12,.15);   color: #F08040; }
+  .chip-yellow  { background: rgba(240,165,0,.15);   color: #F0C040; }
+  .chip-green   { background: rgba(31,184,110,.15);  color: #4FD494; }
+  .chip-red     { background: rgba(224,62,62,.12);   color: #E87070; }
+
+  .vagas-badge {
+    background: rgba(123,63,168,.15);
+    color: #B97FE0;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+  }
+
+  .actions-cell { display: flex; gap: 6px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 42px; margin-bottom: 12px; opacity: .4; }
+  .empty-state p { font-size: 13px; line-height: 1.6; }
+  .empty-state strong { color: var(--text); }
+
+  /* ── MODAL ── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    backdrop-filter: blur(3px);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius-lg);
+    width: 520px; max-width: 95vw;
+    max-height: 90vh; overflow-y: auto;
+    padding: 28px;
+    transform: translateY(12px); transition: transform .2s;
+  }
+  .overlay.open .modal { transform: translateY(0); }
+  .modal-title {
+    font-size: 16px; font-weight: 700; color: var(--text);
+    margin-bottom: 4px;
+  }
+  .modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; }
+  textarea {
+    background: var(--navy-light);
+    border: 1px solid var(--navy-border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 9px 13px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 72px;
+    outline: none;
+    width: 100%;
+    transition: border-color .15s;
+  }
+  textarea:focus { border-color: var(--orange); }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+  /* CONFIG MODAL */
+  .config-note {
+    font-size: 11px; color: var(--text-muted);
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius);
+    padding: 10px 13px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .config-note code { color: var(--orange); font-family: monospace; }
+
+  /* SPINNER */
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.2);
+    border-top-color: var(--orange);
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* TOAST */
+  #toast-container {
+    position: fixed; bottom: 24px; right: 24px;
+    display: flex; flex-direction: column; gap: 8px;
+    z-index: 999;
+  }
+  .toast {
+    background: var(--navy-mid);
+    border: 1px solid var(--navy-border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 12px;
+    color: var(--text);
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    animation: slideIn .25s ease;
+    min-width: 220px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.error   { border-left: 3px solid var(--danger); }
+  .toast.info    { border-left: 3px solid var(--teal); }
+  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* DELETE CONFIRM */
+  .confirm-msg { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+  .confirm-msg strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-brand">
+    <div class="brand-pill">MB</div>
+    <div>
+      <div class="header-title">Lista Foco Comercial</div>
+      <div class="header-sub">Imersão Lovable &amp; Claude em Manaus · 28–29 Jul 2026</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span id="status-badge" class="status-badge offline">● LocalStorage Off-line</span>
+    <button class="btn btn-ghost btn-sm" onclick="openConfig()">⚙ Configurar Planilha</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard">
+    <div class="kpi-card orange">
+      <div class="kpi-label">Total de Empresas</div>
+      <div class="kpi-value" id="kpi-total">0</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">Total de Vagas Previstas</div>
+      <div class="kpi-value" id="kpi-vagas">0</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">Inscrições Confirmadas</div>
+      <div class="kpi-value" id="kpi-confirmadas">0</div>
+    </div>
+    <div class="kpi-card rose">
+      <div class="kpi-label">Em Follow-up</div>
+      <div class="kpi-value" id="kpi-followup">0</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="filter-group">
+      <span class="filter-label">Buscar empresa</span>
+      <input type="text" id="filter-search" placeholder="Nome da empresa..." oninput="applyFilters()" />
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Status Comercial</span>
+      <select id="filter-status" onchange="applyFilters()">
+        <option value="">Todos os status</option>
+        <option>Não Iniciado</option>
+        <option>Realizada abordagem - Ligação</option>
+        <option>Realizada abordagem - WhatsApp/Email</option>
+        <option>Realizada abordagem - Reunião Presencial</option>
+        <option>Realizada abordagem - Reunião Virtual</option>
+        <option>Em Follow-up</option>
+        <option>Termo de Adesão Enviado</option>
+        <option>Inscrição Confirmada</option>
+        <option>Negativado</option>
+        <option>Sem Retorno</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Responsável MB</span>
+      <select id="filter-resp" onchange="applyFilters()">
+        <option value="">Todos os responsáveis</option>
+        <option>Marx Gabriel</option>
+        <option>Márcia Vieira</option>
+        <option>Suely Quadros</option>
+        <option>Jeferson Torres</option>
+        <option>Zander Gabriel</option>
+        <option>Ricardo Reis</option>
+        <option>Lucas Nascimento</option>
+        <option>Camila Evangelista</option>
+        <option>Luísa São Thiago</option>
+      </select>
+    </div>
+    <div class="toolbar-btns">
+      <button class="btn btn-secondary btn-sm" onclick="resetFilters()">Limpar</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn btn-primary" onclick="openAdd()">+ Adicionar Empresa</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="table-info">Exibindo <strong id="count-visible">0</strong> de <strong id="count-total">0</strong> empresas</div>
+      <button class="btn btn-ghost btn-sm" onclick="loadData()" id="btn-refresh">↻ Atualizar</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Responsável MB</th>
+          <th>Status</th>
+          <th style="text-align:center">Vagas Previstas</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div id="empty-state" class="empty-state" style="display:none">
+      <div class="icon">📋</div>
+      <p><strong>Nenhum registro encontrado.</strong><br>Conecte a planilha ou adicione uma empresa para começar.</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- ===== MODAL: CONFIG ===== -->
+<div class="overlay" id="modal-config">
+  <div class="modal" style="width:480px">
+    <div class="modal-title">Configurar Planilha</div>
+    <div class="modal-sub">Conecte ao Google Sheets via Apps Script</div>
+    <div class="config-note">
+      Cole abaixo a URL de implantação do Google Apps Script.<br>
+      Deve terminar com <code>/exec</code>.<br>
+      A URL é salva automaticamente e reconectada ao recarregar a página.
+    </div>
+    <div class="field">
+      <label>URL da API (Apps Script)</label>
+      <input type="text" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-config')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Conectar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: ADD/EDIT ===== -->
+<div class="overlay" id="modal-form">
+  <div class="modal">
+    <div class="modal-title" id="form-title">Adicionar Empresa</div>
+    <div class="modal-sub" id="form-sub">Preencha os dados da empresa foco</div>
+    <input type="hidden" id="form-id" />
+    <div class="form-grid">
+      <div class="field full">
+        <label>Empresa *</label>
+        <input type="text" id="f-nome" placeholder="Nome da empresa" />
+      </div>
+      <div class="field">
+        <label>Contato</label>
+        <input type="text" id="f-contato" placeholder="Nome do contato" />
+      </div>
+      <div class="field">
+        <label>Telefone</label>
+        <input type="text" id="f-telefone" placeholder="(92) 9 0000-0000" />
+      </div>
+      <div class="field">
+        <label>Responsável MB *</label>
+        <select id="f-responsavel">
+          <option value="">Selecione...</option>
+          <option>Marx Gabriel</option>
+          <option>Márcia Vieira</option>
+          <option>Suely Quadros</option>
+          <option>Jeferson Torres</option>
+          <option>Zander Gabriel</option>
+          <option>Ricardo Reis</option>
+          <option>Lucas Nascimento</option>
+          <option>Camila Evangelista</option>
+          <option>Luísa São Thiago</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Status *</label>
+        <select id="f-status">
+          <option value="">Selecione...</option>
+          <option>Não Iniciado</option>
+          <option>Realizada abordagem - Ligação</option>
+          <option>Realizada abordagem - WhatsApp/Email</option>
+          <option>Realizada abordagem - Reunião Presencial</option>
+          <option>Realizada abordagem - Reunião Virtual</option>
+          <option>Em Follow-up</option>
+          <option>Termo de Adesão Enviado</option>
+          <option>Inscrição Confirmada</option>
+          <option>Negativado</option>
+          <option>Sem Retorno</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Qtd. Vagas Previstas</label>
+        <input type="text" id="f-vagas" placeholder="Ex: 3" />
+      </div>
+      <div class="field full">
+        <label>Observações</label>
+        <textarea id="f-obs" placeholder="Anotações comerciais, contexto, próximo passo..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-form')">Cancelar</button>
+      <button class="btn btn-primary" id="form-submit" onclick="submitForm()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: DELETE ===== -->
+<div class="overlay" id="modal-delete">
+  <div class="modal" style="width:400px">
+    <div class="modal-title">Excluir Empresa</div>
+    <p class="confirm-msg" id="delete-msg">Tem certeza que deseja excluir esta empresa? Esta ação não pode ser desfeita.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-delete')">Cancelar</button>
+      <button class="btn btn-danger" id="delete-confirm-btn">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let allData = [];
+  let filteredData = [];
+  let apiUrl = localStorage.getItem('mb_api_url') || '';
+  let pendingDeleteId = null;
+
+  const RESPONSAVEIS = [
+    'Marx Gabriel','Márcia Vieira','Suely Quadros','Jeferson Torres',
+    'Zander Gabriel','Ricardo Reis','Lucas Nascimento','Camila Evangelista',
+    'Luísa São Thiago'
+  ];
+
+  const STATUS_LIST = [
+    'Não Iniciado',
+    'Realizada abordagem - Ligação',
+    'Realizada abordagem - WhatsApp/Email',
+    'Realizada abordagem - Reunião Presencial',
+    'Realizada abordagem - Reunião Virtual',
+    'Em Follow-up',
+    'Termo de Adesão Enviado',
+    'Inscrição Confirmada',
+    'Negativado',
+    'Sem Retorno'
+  ];
+
+  // ── INIT ──
+  window.addEventListener('DOMContentLoaded', () => {
+    if (apiUrl) {
+      document.getElementById('api-url-input').value = apiUrl;
+      loadData();
+    } else {
+      renderTable([]);
+    }
+    document.querySelectorAll('.overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+    });
+  });
+
+  // ── API ──
+  async function loadData() {
+    if (!apiUrl) { toast('Configure a planilha primeiro.', 'info'); return; }
+    const btn = document.getElementById('btn-refresh');
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+    try {
+      const res = await fetch(apiUrl);
+      const json = await res.json();
+      if (json.status === 'ok') {
+        allData = json.data || [];
+        applyFilters();
+        updateBadge(true);
+        localStorage.setItem('mb_fallback', JSON.stringify(allData));
+      } else {
+        throw new Error(json.message);
+      }
+    } catch (e) {
+      toast('Erro ao carregar dados: ' + e.message, 'error');
+      const fallback = localStorage.getItem('mb_fallback');
+      if (fallback) { allData = JSON.parse(fallback); applyFilters(); }
+      updateBadge(false);
+    } finally {
+      btn.innerHTML = '↻ Atualizar';
+      btn.disabled = false;
+    }
+  }
+
+  async function apiPost(payload) {
+    if (!apiUrl) { toast('Sem conexão com a planilha.', 'error'); return null; }
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
+  }
+
+  // ── CONFIG ──
+  function openConfig() {
+    document.getElementById('api-url-input').value = apiUrl;
+    openModal('modal-config');
+  }
+  async function saveConfig() {
+    const url = document.getElementById('api-url-input').value.trim();
+    if (!url || !url.includes('/exec')) {
+      toast('URL inválida. Deve terminar com /exec.', 'error'); return;
+    }
+    apiUrl = url;
+    localStorage.setItem('mb_api_url', url);
+    closeModal('modal-config');
+    toast('Planilha configurada. Carregando dados...', 'info');
+    await loadData();
+  }
+
+  // ── FILTERS ──
+  function applyFilters() {
+    const search = document.getElementById('filter-search').value.toLowerCase();
+    const status = document.getElementById('filter-status').value;
+    const resp   = document.getElementById('filter-resp').value;
+    filteredData = allData.filter(r => {
+      const matchS = !search || (r.nomeEmpresa||'').toLowerCase().includes(search);
+      const matchSt = !status || r.status === status;
+      const matchR  = !resp   || r.responsavelComercial === resp;
+      return matchS && matchSt && matchR;
+    });
+    renderTable(filteredData);
+    updateDashboard(allData);
+  }
+  function resetFilters() {
+    document.getElementById('filter-search').value = '';
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-resp').value = '';
+    applyFilters();
+  }
+
+  // ── DASHBOARD ──
+  function updateDashboard(data) {
+    document.getElementById('kpi-total').textContent = data.length;
+    document.getElementById('kpi-vagas').textContent =
+      data.reduce((s, r) => s + (parseInt(r.qtdVagasPrevistas) || 0), 0);
+    document.getElementById('kpi-confirmadas').textContent =
+      data.filter(r => r.status === 'Inscrição Confirmada').length;
+    document.getElementById('kpi-followup').textContent =
+      data.filter(r => r.status === 'Em Follow-up').length;
+  }
+
+  // ── TABLE ──
+  function renderTable(data) {
+    const tbody = document.getElementById('table-body');
+    const empty = document.getElementById('empty-state');
+    document.getElementById('count-visible').textContent = data.length;
+    document.getElementById('count-total').textContent = allData.length;
+    if (!data.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td><div class="company-name">${esc(r.nomeEmpresa)}</div></td>
+        <td><span class="responsible-name">${esc(r.responsavelComercial)}</span></td>
+        <td>${statusChip(r.status)}</td>
+        <td style="text-align:center">
+          <span class="vagas-badge">${parseInt(r.qtdVagasPrevistas)||0}</span>
+        </td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn btn-ghost btn-sm btn-icon" title="Editar" onclick="openEdit('${esc(r.id)}')">✏️</button>
+            <button class="btn btn-danger btn-sm btn-icon" title="Excluir" onclick="confirmDelete('${esc(r.id)}','${esc(r.nomeEmpresa)}')">🗑</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    updateDashboard(allData);
+  }
+
+  function statusChip(status) {
+    const map = {
+      'Não Iniciado': 'chip-gray',
+      'Realizada abordagem - Ligação': 'chip-blue',
+      'Realizada abordagem - WhatsApp/Email': 'chip-blue',
+      'Realizada abordagem - Reunião Presencial': 'chip-purple',
+      'Realizada abordagem - Reunião Virtual': 'chip-purple',
+      'Em Follow-up': 'chip-orange',
+      'Termo de Adesão Enviado': 'chip-yellow',
+      'Inscrição Confirmada': 'chip-green',
+      'Negativado': 'chip-red',
+      'Sem Retorno': 'chip-gray',
+    };
+    const cls = map[status] || 'chip-gray';
+    return `<span class="status-chip ${cls}">${esc(status||'—')}</span>`;
+  }
+
+  // ── ADD ──
+  function openAdd() {
+    clearForm();
+    document.getElementById('form-title').textContent = 'Adicionar Empresa';
+    document.getElementById('form-sub').textContent = 'Preencha os dados da empresa foco';
+    document.getElementById('form-submit').textContent = 'Salvar';
+    openModal('modal-form');
+  }
+
+  // ── EDIT ──
+  function openEdit(id) {
+    const rec = allData.find(r => String(r.id) === String(id));
+    if (!rec) return;
+    clearForm();
+    document.getElementById('form-id').value = rec.id;
+    document.getElementById('f-nome').value = rec.nomeEmpresa || '';
+    document.getElementById('f-contato').value = rec.contato || '';
+    document.getElementById('f-telefone').value = rec.telefone || '';
+    document.getElementById('f-responsavel').value = rec.responsavelComercial || '';
+    document.getElementById('f-status').value = rec.status || '';
+    document.getElementById('f-vagas').value = rec.qtdVagasPrevistas || '';
+    document.getElementById('f-obs').value = rec.observacoes || '';
+    document.getElementById('form-title').textContent = 'Editar Empresa';
+    document.getElementById('form-sub').textContent = rec.nomeEmpresa;
+    document.getElementById('form-submit').textContent = 'Salvar Alterações';
+    openModal('modal-form');
+  }
+
+  // ── SUBMIT ──
+  async function submitForm() {
+    const id      = document.getElementById('form-id').value;
+    const nome    = document.getElementById('f-nome').value.trim();
+    const contato = document.getElementById('f-contato').value.trim();
+    const tel     = document.getElementById('f-telefone').value.trim();
+    const resp    = document.getElementById('f-responsavel').value;
+    const status  = document.getElementById('f-status').value;
+    const vagas   = document.getElementById('f-vagas').value.trim();
+    const obs     = document.getElementById('f-obs').value.trim();
+
+    if (!nome) { toast('Informe o nome da empresa.', 'error'); return; }
+
+    const cleanId = (id || '').trim();
+    const payload = {
+      action: cleanId ? 'edit' : 'add',
+      id: cleanId, nomeEmpresa: nome, contato, telefone: tel,
+      responsavelComercial: resp, status,
+      qtdVagasPrevistas: parseInt(vagas)||0, observacoes: obs
+    };
+
+    const btn = document.getElementById('form-submit');
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+
+    try {
+      const res = await apiPost(payload);
+      if (res && res.status === 'ok') {
+        toast(cleanId ? 'Empresa atualizada.' : 'Empresa adicionada.', 'success');
+        closeModal('modal-form');
+        await loadData();
+      } else {
+        throw new Error(res?.message || 'Erro desconhecido');
+      }
+    } catch (e) {
+      toast('Erro: ' + e.message, 'error');
+    } finally {
+      btn.innerHTML = cleanId ? 'Salvar Alterações' : 'Salvar';
+      btn.disabled = false;
+    }
+  }
+
+  // ── DELETE ──
+  function confirmDelete(id, nome) {
+    pendingDeleteId = id;
+    document.getElementById('delete-msg').innerHTML =
+      `Deseja excluir <strong>${esc(nome)}</strong>? Esta ação não pode ser desfeita.`;
+    document.getElementById('delete-confirm-btn').onclick = doDelete;
+    openModal('modal-delete');
+  }
+  async function doDelete() {
+    if (!pendingDeleteId) return;
+    const btn = document.getElementById('delete-confirm-btn');
+    btn.innerHTML = '<span class="spinner"></span>';
+    btn.disabled = true;
+    try {
+      const res = await apiPost({ action: 'delete', id: pendingDeleteId });
+      if (res && res.status === 'ok') {
+        toast('Empresa excluída.', 'success');
+        closeModal('modal-delete');
+        await loadData();
+      } else throw new Error(res?.message);
+    } catch (e) {
+      toast('Erro ao excluir: ' + e.message, 'error');
+    } finally {
+      btn.innerHTML = 'Excluir';
+      btn.disabled = false;
+      pendingDeleteId = null;
+    }
+  }
+
+  // ── CSV EXPORT ──
+  function exportCSV() {
+    if (!filteredData.length) { toast('Nenhum dado para exportar.', 'info'); return; }
+    const cols = ['id','nomeEmpresa','contato','telefone','responsavelComercial','status','qtdVagasPrevistas','observacoes'];
+    const header = cols.join(';');
+    const rows = filteredData.map(r => cols.map(c => `"${(r[c]||'').toString().replace(/"/g,'""')}"`).join(';'));
+    const csv = '\uFEFF' + [header, ...rows].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'foco-comercial.csv'; a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV exportado.', 'success');
+  }
+
+  // ── MODAL HELPERS ──
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function clearForm() {
+    ['form-id','f-nome','f-contato','f-telefone','f-vagas','f-obs'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-responsavel').value = '';
+    document.getElementById('f-status').value = '';
+  }
+
+  // ── STATUS BADGE ──
+  function updateBadge(online) {
+    const b = document.getElementById('status-badge');
+    b.className = 'status-badge ' + (online ? 'online' : 'offline');
+    b.textContent = online ? '● Google Sheets Online' : '● LocalStorage Off-line';
+  }
+
+  // ── TOAST ──
+  function toast(msg, type = 'info') {
+    const c = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+    el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+    c.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  // ── UTIL ──
+  function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
